@@ -3,56 +3,141 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Free Bot Creation - QuelionBots</title>
+<title>QuelionBots - Free Bot Creation</title>
 <style>
-body { font-family: Arial, sans-serif; background: #1a1a1a; color: #eee; margin:0; padding:0;}
-header { background: #111; padding: 20px; text-align: center; }
-h1 { color: #4CAF50; }
-section { padding: 20px; max-width: 900px; margin: auto; }
-input, textarea, button { width: 100%; padding: 10px; margin: 5px 0; }
-button { background: #4CAF50; border: none; color: #fff; cursor: pointer; }
-button:hover { background: #45a049; }
-footer { text-align: center; padding: 20px; background: #111; color: #aaa; }
+  body {
+    font-family: 'Arial', sans-serif;
+    background: linear-gradient(to right, #ff9a9e, #fad0c4, #fbc2eb);
+    color: #333;
+    margin: 0;
+    padding: 0;
+  }
+  header {
+    background: #6a11cb;
+    color: white;
+    padding: 25px 20px;
+    text-align: center;
+    font-size: 2.5em;
+    font-weight: bold;
+  }
+  section {
+    padding: 40px 20px;
+    margin: 20px auto;
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 15px;
+    max-width: 900px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+  }
+  h2 {
+    color: #6a11cb;
+    font-size: 2em;
+    margin-bottom: 10px;
+  }
+  p {
+    font-size: 1.1em;
+    line-height: 1.6em;
+  }
+  ul {
+    font-size: 1.1em;
+    margin-left: 20px;
+  }
+  form {
+    display: flex;
+    flex-direction: column;
+  }
+  input, textarea, button {
+    padding: 12px;
+    margin: 10px 0;
+    border-radius: 8px;
+    border: 1px solid #6a11cb;
+    font-size: 1em;
+  }
+  button {
+    background-color: #6a11cb;
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s;
+  }
+  button:hover {
+    background-color: #8e44ad;
+  }
+  footer {
+    background: #6a11cb;
+    color: white;
+    text-align: center;
+    padding: 20px;
+  }
+  .feature-card {
+    background: #fff0f5;
+    padding: 20px;
+    margin: 15px 0;
+    border-radius: 10px;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+  }
 </style>
 </head>
 <body>
-
 <header>
-  <h1>QuelionBots - Free Bot Creation</h1>
-  <p>Create your Discord bots for free! Contact us using the form below.</p>
+QuelionBots - Free Bot Creation
 </header>
 
 <section>
-  <h2>About This Service</h2>
-  <p>We help you create Discord bots with a full feature set, including admin commands, fun commands, voice commands, logging, and more. Fill out the form to request your bot or get in touch.</p>
+<h2>About</h2>
+<p>Welcome to <strong>QuelionBots</strong>, the platform where anyone can create bots for free! Whether you want a bot for fun, moderation, or automating tasks, we make it easy. You can customize your bots and even request advanced commands.</p>
 </section>
 
 <section>
-  <h2>Contact Form</h2>
-  <form id="botForm" method="POST" data-netlify="true" name="bot-request" enctype="multipart/form-data">
-    <input type="text" name="name" placeholder="Your Name" required>
-    <input type="email" name="email" placeholder="Your Email" required>
-    <input type="file" name="icon" accept="image/*">
-    <textarea name="message" placeholder="Describe your bot request or message" required></textarea>
-    <button type="submit">Send Request</button>
-  </form>
-  <p id="status"></p>
+<h2>Features</h2>
+<div class="feature-card">
+<h3>General Features</h3>
+<ul>
+  <li>Create bots easily without coding knowledge</li>
+  <li>Friendly and colorful interface</li>
+  <li>Commands for fun, moderation, and utility</li>
+  <li>Fully documented in the help section</li>
+</ul>
+</div>
+<div class="feature-card">
+<h3>Admin Commands</h3>
+<ul>
+  <li>Kick, ban, mute users</li>
+  <li>Manage messages (delete, pin, unpin)</li>
+  <li>Change nicknames and roles</li>
+  <li>Log actions in a designated channel</li>
+  <li>Voice channel management (move users, mute/unmute)</li>
+</ul>
+<p><em>Note: Admin commands only work if you have the required permissions. Contact us to add or remove commands.</em></p>
+</div>
+<div class="feature-card">
+<h3>Fun Commands</h3>
+<ul>
+  <li>Random memes and jokes</li>
+  <li>Games and trivia</li>
+  <li>Music commands with YouTube integration</li>
+  <li>Profile customization including avatar upload</li>
+</ul>
+</div>
 </section>
 
 <section>
-  <h2>Features Included</h2>
-  <ul>
-    <li>Full admin commands (kick, ban, message delete, role management)</li>
-    <li>Fun and utility commands</li>
-    <li>Voice channel commands (join, leave, play audio)</li>
-    <li>Logging of actions in a dedicated channel</li>
-    <li>Custom bot icon upload</li>
-  </ul>
+<h2>How to Get Started</h2>
+<p>Simply fill out the form below to request your bot. Include the bot's name, desired features, and your contact information. Our team will respond and guide you through the process.</p>
+</section>
+
+<section>
+<h2>Contact Us</h2>
+<p>If you want to remove commands or customize your bot further, use the form below:</p>
+<form>
+  <input type="text" name="name" placeholder="Your Name" required>
+  <input type="email" name="email" placeholder="Your Email" required>
+  <textarea name="message" placeholder="Your Message / Bot Request" rows="6" required></textarea>
+  <button type="submit">Send Request</button>
+</form>
 </section>
 
 <footer>
-  <p>&copy; 2025 QuelionBots. You can contact us through the form above for any requests.</p>
+&copy; 2025 QuelionBots. All rights reserved. Contact us through the form for command modifications.
 </footer>
-
 </body>
 </html>
