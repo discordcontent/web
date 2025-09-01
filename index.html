@@ -1,143 +1,156 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>QuelionBots - Free Bot Creation</title>
-<style>
-  body {
-    font-family: 'Arial', sans-serif;
-    background: linear-gradient(to right, #ff9a9e, #fad0c4, #fbc2eb);
-    color: #333;
-    margin: 0;
-    padding: 0;
-  }
-  header {
-    background: #6a11cb;
-    color: white;
-    padding: 25px 20px;
-    text-align: center;
-    font-size: 2.5em;
-    font-weight: bold;
-  }
-  section {
-    padding: 40px 20px;
-    margin: 20px auto;
-    background: rgba(255, 255, 255, 0.9);
-    border-radius: 15px;
-    max-width: 900px;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-  }
-  h2 {
-    color: #6a11cb;
-    font-size: 2em;
-    margin-bottom: 10px;
-  }
-  p {
-    font-size: 1.1em;
-    line-height: 1.6em;
-  }
-  ul {
-    font-size: 1.1em;
-    margin-left: 20px;
-  }
-  form {
-    display: flex;
-    flex-direction: column;
-  }
-  input, textarea, button {
-    padding: 12px;
-    margin: 10px 0;
-    border-radius: 8px;
-    border: 1px solid #6a11cb;
-    font-size: 1em;
-  }
-  button {
-    background-color: #6a11cb;
-    color: white;
-    font-weight: bold;
-    cursor: pointer;
-    transition: background-color 0.3s;
-  }
-  button:hover {
-    background-color: #8e44ad;
-  }
-  footer {
-    background: #6a11cb;
-    color: white;
-    text-align: center;
-    padding: 20px;
-  }
-  .feature-card {
-    background: #fff0f5;
-    padding: 20px;
-    margin: 15px 0;
-    border-radius: 10px;
-    box-shadow: 0 3px 10px rgba(0,0,0,0.1);
-  }
-</style>
-</head>
-<body>
-<header>
-QuelionBots - Free Bot Creation
-</header>
+import os
+import discord
+from discord import app_commands, FFmpegPCMAudio
+from discord.ext import commands
+import asyncio
+from asyncio import Queue
+import youtube_dl
 
-<section>
-<h2>About</h2>
-<p>Welcome to <strong>QuelionBots</strong>, the platform where anyone can create bots for free! Whether you want a bot for fun, moderation, or automating tasks, we make it easy. You can customize your bots and even request advanced commands.</p>
-</section>
+# ---------------- CONFIG ----------------
+TOKEN = os.getenv("DISCORD_TOKEN")
+ADMIN_ROLE_ID = int(os.getenv("ADMIN_ROLE_ID", 0))
+LOG_CHANNEL_ID = int(os.getenv("LOG_CHANNEL_ID", 0))
+DEFAULT_VC_ID = int(os.getenv("DEFAULT_VC_ID", 0))
+GUILD_ID = int(os.getenv("GUILD_ID", 0))
 
-<section>
-<h2>Features</h2>
-<div class="feature-card">
-<h3>General Features</h3>
-<ul>
-  <li>Create bots easily without coding knowledge</li>
-  <li>Friendly and colorful interface</li>
-  <li>Commands for fun, moderation, and utility</li>
-  <li>Fully documented in the help section</li>
-</ul>
-</div>
-<div class="feature-card">
-<h3>Admin Commands</h3>
-<ul>
-  <li>Kick, ban, mute users</li>
-  <li>Manage messages (delete, pin, unpin)</li>
-  <li>Change nicknames and roles</li>
-  <li>Log actions in a designated channel</li>
-  <li>Voice channel management (move users, mute/unmute)</li>
-</ul>
-<p><em>Note: Admin commands only work if you have the required permissions. Contact us to add or remove commands.</em></p>
-</div>
-<div class="feature-card">
-<h3>Fun Commands</h3>
-<ul>
-  <li>Random memes and jokes</li>
-  <li>Games and trivia</li>
-  <li>Music commands with YouTube integration</li>
-  <li>Profile customization including avatar upload</li>
-</ul>
-</div>
-</section>
+intents = discord.Intents.all()
+bot = commands.Bot(command_prefix="/", intents=intents)
+guild_queues = {}  # music queues per guild
 
-<section>
-<h2>How to Get Started</h2>
-<p>Simply fill out the form below to request your bot. Include the bot's name, desired features, and your contact information. Our team will respond and guide you through the process.</p>
-</section>
+def get_queue(guild_id):
+    if guild_id not in guild_queues:
+        guild_queues[guild_id] = Queue()
+    return guild_queues[guild_id]
 
-<section>
-<h2>Contact Us</h2>
-<p>If you want to remove commands or customize your bot further, use the form below:</p>
-<form>
-  <input type="text" name="name" placeholder="Your Name" required>
-  <input type="email" name="email" placeholder="Your Email" required>
-  <textarea name="message" placeholder="Your Message / Bot Request" rows="6" required></textarea>
-  <button type="submit">Send Request</button>
-</form>
-</section>
+# ---------------- LOGGING ----------------
+async def log_action(guild, message):
+    channel = guild.get_channel(LOG_CHANNEL_ID)
+    if channel:
+        await channel.send(message)
 
-<footer>
-&copy; 2025 QuelionBots. All rights reserved. Contact us through the form for command modifications.
-</footer>
-</body>
-</html>
+# ---------------- HELPER ----------------
+def is_admin(user: discord.Member):
+    return any(role.id == ADMIN_ROLE_ID for role in user.roles)
+
+# ---------------- MUSIC ----------------
+ydl_opts = {
+    'format': 'bestaudio/best',
+    'noplaylist': True,
+    'quiet': True,
+}
+
+async def play_next(ctx):
+    queue = get_queue(ctx.guild.id)
+    if queue.empty():
+        await ctx.voice_client.disconnect()
+        return
+    url = await queue.get()
+    with youtube_dl.YoutubeDL(ydl_opts) as ydl:
+        info = ydl.extract_info(url, download=False)
+        audio_url = info['url']
+    ctx.voice_client.play(FFmpegPCMAudio(audio_url), after=lambda e: asyncio.run_coroutine_threadsafe(play_next(ctx), bot.loop))
+
+# ---------------- EVENTS ----------------
+@bot.event
+async def on_ready():
+    await bot.tree.sync(guild=discord.Object(id=GUILD_ID))
+    print(f"✅ Logged in as {bot.user}")
+
+# ---------------- SLASH COMMANDS ----------------
+# ---- MUSIC ----
+@bot.tree.command(name="play", description="Play YouTube audio in VC")
+async def play(interaction: discord.Interaction, url: str):
+    if not interaction.user.voice:
+        return await interaction.response.send_message("❌ Join a VC first", ephemeral=True)
+    channel = interaction.user.voice.channel if interaction.user.voice else interaction.guild.get_channel(DEFAULT_VC_ID)
+    if not interaction.guild.voice_client:
+        await channel.connect()
+    queue = get_queue(interaction.guild.id)
+    await queue.put(url)
+    if not interaction.guild.voice_client.is_playing():
+        await play_next(interaction.guild)
+    await interaction.response.send_message(f"🎵 Added to queue: {url}")
+    await log_action(interaction.guild, f"{interaction.user} queued {url}")
+
+@bot.tree.command(name="pause", description="Pause the current track")
+async def pause(interaction: discord.Interaction):
+    vc = interaction.guild.voice_client
+    if vc and vc.is_playing():
+        vc.pause()
+        await interaction.response.send_message("⏸ Paused")
+        await log_action(interaction.guild, f"{interaction.user} paused playback")
+    else:
+        await interaction.response.send_message("❌ Nothing playing", ephemeral=True)
+
+@bot.tree.command(name="resume", description="Resume paused track")
+async def resume(interaction: discord.Interaction):
+    vc = interaction.guild.voice_client
+    if vc and vc.is_paused():
+        vc.resume()
+        await interaction.response.send_message("▶️ Resumed")
+        await log_action(interaction.guild, f"{interaction.user} resumed playback")
+    else:
+        await interaction.response.send_message("❌ Nothing paused", ephemeral=True)
+
+@bot.tree.command(name="stop", description="Stop playback and clear queue")
+async def stop(interaction: discord.Interaction):
+    vc = interaction.guild.voice_client
+    if vc:
+        vc.stop()
+        queue = get_queue(interaction.guild.id)
+        while not queue.empty():
+            await queue.get()
+        await interaction.response.send_message("⏹ Stopped and cleared queue")
+        await log_action(interaction.guild, f"{interaction.user} stopped playback")
+    else:
+        await interaction.response.send_message("❌ Not in VC", ephemeral=True)
+
+@bot.tree.command(name="queue", description="Show current queue")
+async def show_queue(interaction: discord.Interaction):
+    queue = get_queue(interaction.guild.id)
+    if queue.empty():
+        await interaction.response.send_message("🎶 Queue is empty")
+    else:
+        items = list(queue._queue)
+        msg = "\n".join([f"{i+1}. {url}" for i, url in enumerate(items)])
+        await interaction.response.send_message(f"🎶 Current Queue:\n{msg}")
+
+# ---- ADMIN ----
+@bot.tree.command(name="kick", description="Kick a member (admin only)")
+async def kick(interaction: discord.Interaction, member: discord.Member, reason: str = "No reason"):
+    if not is_admin(interaction.user):
+        return await interaction.response.send_message("❌ Admins only", ephemeral=True)
+    await member.kick(reason=reason)
+    await interaction.response.send_message(f"👢 Kicked {member}")
+    await log_action(interaction.guild, f"{interaction.user} kicked {member} ({reason})")
+
+@bot.tree.command(name="ban", description="Ban a member (admin only)")
+async def ban(interaction: discord.Interaction, member: discord.Member, reason: str = "No reason"):
+    if not is_admin(interaction.user):
+        return await interaction.response.send_message("❌ Admins only", ephemeral=True)
+    await member.ban(reason=reason)
+    await interaction.response.send_message(f"🔨 Banned {member}")
+    await log_action(interaction.guild, f"{interaction.user} banned {member} ({reason})")
+
+@bot.tree.command(name="purge", description="Delete messages (admin only)")
+async def purge(interaction: discord.Interaction, limit: int = 5):
+    if not is_admin(interaction.user):
+        return await interaction.response.send_message("❌ Admins only", ephemeral=True)
+    deleted = await interaction.channel.purge(limit=limit)
+    await interaction.response.send_message(f"🧹 Deleted {len(deleted)} messages", ephemeral=True)
+    await log_action(interaction.guild, f"{interaction.user} purged {len(deleted)} messages in {interaction.channel}")
+
+# ---- HELP ----
+@bot.tree.command(name="help", description="Show help menu")
+async def help(interaction: discord.Interaction):
+    embed = discord.Embed(title="Bot Help", color=discord.Color.blurple())
+    embed.add_field(name="Fun & Music", value="/play, /pause, /resume, /stop, /queue", inline=False)
+    if is_admin(interaction.user):
+        embed.add_field(name="Admin", value="/kick, /ban, /purge", inline=False)
+    await interaction.response.send_message(embed=embed, ephemeral=True)
+
+# ---------------- RUN ----------------
+if not TOKEN:
+    print("ERROR: DISCORD_TOKEN env variable not set")
+else:
+    bot.run(TOKEN)
