@@ -1,0 +1,9 @@
+[build]
+  publish = "."
+  functions = "netlify/functions"
+
+[[redirects]]
+  from = "/submit"
+  to = "/.netlify/functions/submit-form"
+  status = 200
+  methods = ["POST"]

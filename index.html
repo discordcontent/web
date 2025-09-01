@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Free Bot Creation - QuelionBots</title>
+<style>
+body { font-family: Arial, sans-serif; background: #1a1a1a; color: #eee; margin:0; padding:0;}
+header { background: #111; padding: 20px; text-align: center; }
+h1 { color: #4CAF50; }
+section { padding: 20px; max-width: 900px; margin: auto; }
+input, textarea, button { width: 100%; padding: 10px; margin: 5px 0; }
+button { background: #4CAF50; border: none; color: #fff; cursor: pointer; }
+button:hover { background: #45a049; }
+footer { text-align: center; padding: 20px; background: #111; color: #aaa; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>QuelionBots - Free Bot Creation</h1>
+  <p>Create your Discord bots for free! Contact us using the form below.</p>
+</header>
+
+<section>
+  <h2>About This Service</h2>
+  <p>We help you create Discord bots with a full feature set, including admin commands, fun commands, voice commands, logging, and more. Fill out the form to request your bot or get in touch.</p>
+</section>
+
+<section>
+  <h2>Contact Form</h2>
+  <form id="botForm" method="POST" data-netlify="true" name="bot-request" enctype="multipart/form-data">
+    <input type="text" name="name" placeholder="Your Name" required>
+    <input type="email" name="email" placeholder="Your Email" required>
+    <input type="file" name="icon" accept="image/*">
+    <textarea name="message" placeholder="Describe your bot request or message" required></textarea>
+    <button type="submit">Send Request</button>
+  </form>
+  <p id="status"></p>
+</section>
+
+<section>
+  <h2>Features Included</h2>
+  <ul>
+    <li>Full admin commands (kick, ban, message delete, role management)</li>
+    <li>Fun and utility commands</li>
+    <li>Voice channel commands (join, leave, play audio)</li>
+    <li>Logging of actions in a dedicated channel</li>
+    <li>Custom bot icon upload</li>
+  </ul>
+</section>
+
+<footer>
+  <p>&copy; 2025 QuelionBots. You can contact us through the form above for any requests.</p>
+</footer>
+
+</body>
+</html>
